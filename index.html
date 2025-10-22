@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro de alunos</title>
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const botaoSubmit = document.querySelector("#cadastro");
+    const tabela = document.querySelector("#table");
+    let registros = [];
+
+    function rebuildTable() {
+        let html = `
+        <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Curso</th>
+            <th></th>
+            <th></th>
+        </tr>`;
+        registros.forEach((r, i) => {
+            html += `
+            <tr>
+                <td>${r.nome}</td>
+                <td>${r.idade}</td>
+                <td>${r.curso}</td>
+                <td><button type="button" class="editar" data-index="${i}">Editar</button></td>
+                <td><button type="button" class="excluir" data-index="${i}">Excluir</button></td>
+            </tr>`;
+        });
+        tabela.innerHTML = html;
+    }
+
+    botaoSubmit.addEventListener("click", function() {
+        const nome = document.querySelector("#nome").value;
+        const idade = document.querySelector("#idade").value;
+        const curso = document.querySelector("#curso").value;
+
+        registros.push({ nome, idade, curso });
+        rebuildTable();
+    });
+
+    tabela.addEventListener("click", function(e) {
+        const index = parseInt(e.target.dataset.index);
+
+        if (e.target.classList.contains("editar")) {
+            const row = e.target.closest("tr");
+            const r = registros[index];
+            row.innerHTML = `
+                <td><input type="text" id="nome-${index}" value="${r.nome}"></td>
+                <td><input type="number" id="idade-${index}" value="${r.idade}"></td>
+                <td>
+                    <select id="curso-${index}">
+                        <option value="JavaScript" ${r.curso === "JavaScript" ? "selected" : ""}>JavaScript</option>
+                        <option value="Python" ${r.curso === "Python" ? "selected" : ""}>Python</option>
+                        <option value="Java" ${r.curso === "Java" ? "selected" : ""}>Java</option>
+                    </select>
+                </td>
+                <td><button type="button" class="confirmar" data-index="${index}">Confirmar</button></td>
+                <td></td>
+            `;
+        }
+
+        if (e.target.classList.contains("confirmar")) {
+            const novoNome = document.querySelector(`#nome-${index}`).value;
+            const novaIdade = document.querySelector(`#idade-${index}`).value;
+            const novoCurso = document.querySelector(`#curso-${index}`).value;
+            registros[index] = { nome: novoNome, idade: novaIdade, curso: novoCurso };
+            rebuildTable();
+        }
+
+        if (e.target.classList.contains("excluir")) {
+            registros.splice(index, 1);
+            rebuildTable();
+        }
+    });
+});
+</script>
+</head>
+<body>
+<form>
+    <label>Nome</label>
+    <input type="text" id="nome"><br>
+
+    <label>Idade</label>
+    <input type="number" id="idade"><br>
+
+    <label>Curso</label>
+    <select id="curso">
+        <option value="JavaScript">JavaScript</option>
+        <option value="Python">Python</option>
+        <option value="Java">Java</option>
+    </select><br>
+
+    <button type="button" id="cadastro">Cadastrar</button>
+</form>
+
+<table id="table">
+    <tr>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Curso</th>
+        <th></th>
+        <th></th>
+    </tr>
+</table>
+</body>
+</html>
