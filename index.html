@@ -5,7 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cadastro de alunos</title>
 <script>
+class Aluno {
+    constructor(nome, idade, curso, notaFinal) {
+        this._nome = nome;
+        this._idade = idade;
+        this._curso = curso;
+        this._notaFinal = notaFinal;
+    }
 
+    /* Getters e setters */
+    get nome() {
+        return this._nome;
+    }
+
+    set nome(novoNome) {
+        this._nome = novoNome;
+    }
+
+    get idade() {
+        return this._idade;
+    }
+
+    set idade(novaIdade) {
+        this._idade = novaIdade;
+    }
+
+    get curso() {
+        return this._curso;
+    }
+
+    set curso(novoCurso) {
+        this._curso = novoCurso;
+    }
+
+    get notaFinal() {
+        return this._notaFinal;
+    }
+
+    set notaFinal(novaNotaFinal) {
+        this._notaFinal = novaNotaFinal;
+    }
+    /* Fim getters e setters*/
+
+    isAprovado() {
+        return this._notaFinal >= 7;
+    }
+
+    toString() {
+        return `
+        Nome: ${this._nome};
+        Idade: ${this._idade};
+        Curso: ${this._curso};
+        Nota Final: ${this._notaFinal};
+        `
+    }
+}
 
 document.addEventListener("DOMContentLoaded", function() {
     const botaoSubmit = document.querySelector("#cadastro");
@@ -18,15 +72,20 @@ document.addEventListener("DOMContentLoaded", function() {
             <th>Nome</th>
             <th>Idade</th>
             <th>Curso</th>
+            <th>Nota Final</th>
+            <th>Aprovado</th>
             <th></th>
             <th></th>
         </tr>`;
+
         registros.forEach((r, i) => {
             html += `
             <tr>
                 <td>${r.nome}</td>
                 <td>${r.idade}</td>
                 <td>${r.curso}</td>
+                <td>${r.notaFinal}</td>
+                <td>${r.isAprovado()}</td>
                 <td><button type="button" class="editar" data-index="${i}">Editar</button></td>
                 <td><button type="button" class="excluir" data-index="${i}">Excluir</button></td>
             </tr>`;
@@ -38,8 +97,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const nome = document.querySelector("#nome").value;
         const idade = document.querySelector("#idade").value;
         const curso = document.querySelector("#curso").value;
+        const nota = document.querySelector("#nota").value
 
-        registros.push({ nome, idade, curso });
+        registros.push(new Aluno(nome, idade, curso, nota));
         rebuildTable();
     });
 
@@ -59,6 +119,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <option value="Java" ${r.curso === "Java" ? "selected" : ""}>Java</option>
                     </select>
                 </td>
+                <td><input type="number" id="nota-${index}" value="${r.notaFinal}"></td>
                 <td><button type="button" class="confirmar" data-index="${index}">Confirmar</button></td>
                 <td></td>
             `;
@@ -68,7 +129,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const novoNome = document.querySelector(`#nome-${index}`).value;
             const novaIdade = document.querySelector(`#idade-${index}`).value;
             const novoCurso = document.querySelector(`#curso-${index}`).value;
-            registros[index] = { nome: novoNome, idade: novaIdade, curso: novoCurso };
+            const novaNota = document.querySelector(`#nota-${index}`).value;
+            registros[index] = new Aluno(novoNome, novaIdade, novoCurso, novaNota);
             rebuildTable();
         }
 
@@ -78,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
 </script>
 </head>
 <body>
@@ -94,6 +157,8 @@ document.addEventListener("DOMContentLoaded", function() {
         <option value="Python">Python</option>
         <option value="Java">Java</option>
     </select><br>
+    <label>Nota Final</label>
+    <input type="number" id="nota"><br>
 
     <button type="button" id="cadastro">Cadastrar</button>
 </form>
@@ -103,6 +168,8 @@ document.addEventListener("DOMContentLoaded", function() {
         <th>Nome</th>
         <th>Idade</th>
         <th>Curso</th>
+        <th>Nota Final</th>
+        <th>Aprovado</th>
         <th></th>
         <th></th>
     </tr>
