@@ -65,8 +65,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const botaoSubmit = document.querySelector("#cadastro");
     const tabela = document.querySelector("#table");
     let registros = [];
-
-    function rebuildTable() {
+    let relatorioCanvas = document.querySelector("#relatorios");
+    let rebuildTable = () => {
         let html = `
         <tr>
             <th>Nome</th>
@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         registros.push(new Aluno(nome, idade, curso, nota));
         rebuildTable();
+        console.log(`Registro cadastrado: ${registros[registros.length - 1]}`);
     });
 
     tabela.addEventListener("click", function(e) {
@@ -126,39 +127,153 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (e.target.classList.contains("confirmar")) {
-            const novoNome = document.querySelector(`#nome-${index}`).value;
-            const novaIdade = document.querySelector(`#idade-${index}`).value;
-            const novoCurso = document.querySelector(`#curso-${index}`).value;
-            const novaNota = document.querySelector(`#nota-${index}`).value;
-            registros[index] = new Aluno(novoNome, novaIdade, novoCurso, novaNota);
+            let oldEntry = registros[index];
+            const newName = document.querySelector(`#nome-${index}`).value;
+            const newAge = document.querySelector(`#idade-${index}`).value;
+            const newCourse = document.querySelector(`#curso-${index}`).value;
+            const newGrade = document.querySelector(`#nota-${index}`).value;
+            registros[index] = new Aluno(newName, newAge, newCourse, newGrade);
             rebuildTable();
+            console.log(`Registro editado:
+            Nome: ${oldEntry.nome} -> ${newName},
+            Idade: ${oldEntry.idade} -> ${newAge},
+            Curso: ${oldEntry.curso} -> ${newCourse},
+            Nota: ${oldEntry.notaFinal} -> ${newGrade}
+            `);
         }
 
         if (e.target.classList.contains("excluir")) {
-            registros.splice(index, 1);
+            let deletedEntry = registros.splice(index, 1);
             rebuildTable();
+            console.log(`Registro excluído: ${deletedEntry[0].toString()}.`);
         }
     });
+
+    let botaoAprovados = document.querySelector("#aprovados");
+    botaoAprovados.addEventListener("click", function() {
+        const aprovados = registros.filter((aluno) => aluno.notaFinal >= 7);
+
+        let html = `
+        <table>
+            <tr>
+                <th>Nome</th>
+                <th>Nota</th>
+            </tr>
+            `;
+        
+        aprovados.forEach((r) => {
+            html += `
+                <tr>
+                    <td>${r.nome}</td>
+                    <td>${r.notaFinal}</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+
+        relatorioCanvas.innerHTML = html;
+    });
+
+    let botaoMedia = document.querySelector("#mediaNotas");
+    botaoMedia.addEventListener("click", function() {
+        let media = registros.reduce((acc, cur) => acc + parseFloat(cur.notaFinal), 0) / registros.length;
+        let html = `<strong>Média:</strong> ${media}`;
+        
+        relatorioCanvas.innerHTML = html;
+    });
+
+    let botaoIdade = document.querySelector("#mediaIdades");
+    botaoIdade.addEventListener("click", function() {
+        let media = registros.reduce((acc, cur) => acc + parseInt(cur.idade), 0) / registros.length;
+        let html = `<strong>Média de idade:</strong> ${media}`;
+        
+        relatorioCanvas.innerHTML = html;
+    });
+
+    let botaoAlfabetica = document.querySelector("#ordemAlfabetica");
+    botaoAlfabetica.addEventListener("click", function() {
+        let registrosOrdenados = registros.sort();
+        let html = `
+        <table>
+        <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Curso</th>
+            <th>Nota Final</th>
+            <th>Aprovado</th>
+            <th></th>
+            <th></th>
+        </tr>`;
+
+        registrosOrdenados.forEach((r, i) => {
+            html += `
+            <tr>
+                <td>${r.nome}</td>
+                <td>${r.idade}</td>
+                <td>${r.curso}</td>
+                <td>${r.notaFinal}</td>
+                <td>${r.isAprovado()}</td>
+            </tr>`;
+        });
+        html += "</table>"
+        relatorioCanvas.innerHTML = html;
+    });
+
+    let botaoCursos = document.querySelector("#quantidadeCurso");
+    botaoCursos.addEventListener("click", function() {
+        let qtdPython = registros.filter((registro) => registro.curso === "Python").length;
+        let qtdJS = registros.filter((registro) => registro.curso === "JavaScript").length;
+        let qtdJava = registros.filter((registro) => registro.curso === "Java").length;
+
+        let html = `
+        <table>
+            <tr>
+                <th>Curso</th>
+                <th>Quantidade de alunos</th>
+            </tr>
+
+            <tr>
+                <td>Python</td>
+                <td>${qtdPython}</td>
+            </tr>
+            <tr>
+                <td>JavaScript</td>
+                <td>${qtdJS}</td>
+            </tr>
+            <tr>
+                <td>Java</td>
+                <td>${qtdJava}</td>
+            </tr>
+        </table>
+            `;
+
+        relatorioCanvas.innerHTML = html;
+
+        
+    });
 });
+
 
 </script>
 </head>
 <body>
 <form>
     <label>Nome</label>
-    <input type="text" id="nome"><br>
+    <input type="text" id="nome" required><br>
 
     <label>Idade</label>
-    <input type="number" id="idade"><br>
+    <input type="number" id="idade" min="0" max="150" step="1" required><br>
 
     <label>Curso</label>
-    <select id="curso">
+    <select id="curso" required>
+        <option value="" disabled selected>Selecione um curso</option>
         <option value="JavaScript">JavaScript</option>
         <option value="Python">Python</option>
         <option value="Java">Java</option>
     </select><br>
     <label>Nota Final</label>
-    <input type="number" id="nota"><br>
+    <input type="number" id="nota" min="0" max="10" required><br>
 
     <button type="button" id="cadastro">Cadastrar</button>
 </form>
@@ -174,5 +289,13 @@ document.addEventListener("DOMContentLoaded", function() {
         <th></th>
     </tr>
 </table>
+
+<button type="button" id="aprovados">Listar aprovados</button>
+<button type="button" id="mediaNotas">Média de notas</button>
+<button type="button" id="mediaIdades">Média de idades</button>
+<button type="button" id="ordemAlfabetica">Ordem alfabética</button>
+<button type="button" id="quantidadeCurso">Listar quantidade de alunos por curso</button>
+<div id="relatorios"></div>
+
 </body>
 </html>
